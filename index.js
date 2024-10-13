@@ -3,7 +3,7 @@ const express = require('express');
 const { Client } = require('pg');
 require('dotenv').config();
 const app = express();
-const port = process.env.PORT || 4000;
+const port = process.env.DB_PORT || 4000;
 app.use(express.json());
 
 const dbConfig = {
@@ -11,7 +11,7 @@ const dbConfig = {
     user: 'root',
     database: 'one_qr26',
     password: 'PntsJjvJWrEanI1wYFzMy2uI5UG44yQi',
-    port: port,
+    port: 5432,
 };
 
 
