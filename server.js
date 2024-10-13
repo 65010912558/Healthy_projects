@@ -8,12 +8,12 @@ const port = 3000;
 app.use(express.json());
 
 const client = new Client({
-    host: "localhost",
-    user: "postgres",
-    port: 5432,
-    password: "pooHLK123",
-    database: "one"
+    connectionString: process.env.DATABASE_URL, // ใช้ตัวแปร environment
+    ssl: {
+        rejectUnauthorized: false // สำหรับหลีกเลี่ยงปัญหา SSL ในบางกรณี
+    }
 });
+
 
 // เชื่อมต่อกับฐานข้อมูล
 client.connect().catch(err => console.error('Connection error', err.stack));
