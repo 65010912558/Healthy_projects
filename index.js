@@ -1,22 +1,31 @@
 const express = require('express');
 const { Client } = require('pg');
-
+require('dotenv').config();
 const app = express();
 const port = 3000;
 
 // ใช้ express.json() เพื่อให้สามารถอ่านข้อมูล JSON ได้จาก request body
 app.use(express.json());
 
+// ตรวจสอบว่าเป็นการเชื่อมต่อกับ localhost หรือเซิร์ฟเวอร์ภายนอก
 const client = new Client({
-    host: "localhost",
-    user: "postgres",
-    port: 5432,
-    password: "pooHLK123",
-    database: "one"
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.DATABASE_URL.includes("localhost") ? false : {
+        rejectUnauthorized: false
+    }
 });
 
+client.connect(err => {
+    if (err) {
+        console.error('Connection error', err.stack);
+    } else {
+        console.log('Connected to the database');
+    }
+});
+
+
+
 // เชื่อมต่อกับฐานข้อมูล
-client.connect().catch(err => console.error('Connection error', err.stack));
 
 // ฟังก์ชันดึงข้อมูลทั้งหมดจาก goals
 app.get('/api/goals', async (req, res) => {
