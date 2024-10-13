@@ -2,15 +2,16 @@
 const express = require('express');
 const { Client } = require('pg');
 
-
 const app = express();
+const port = process.env.PORT || 4000;
+app.use(express.json()); 
 
 const dbConfig = {
     host: 'dpg-cs62pr88fa8c73aslnk0-a',
     user: 'root',
     database: 'one_qr26',
     password: 'PntsJjvJWrEanI1wYFzMy2uI5UG44yQi',
-    port: 5432,
+    port: port,
 };
 
 
