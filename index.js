@@ -1,17 +1,17 @@
 
 const express = require('express');
 const { Client } = require('pg');
-
+require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 4000;
-app.use(express.json()); 
+app.use(express.json());
 
 const dbConfig = {
     host: 'dpg-cs62pr88fa8c73aslnk0-a',
     user: 'root',
     database: 'one_qr26',
     password: 'PntsJjvJWrEanI1wYFzMy2uI5UG44yQi',
-    port: port,
+    port: portT,
 };
 
 
@@ -26,6 +26,10 @@ client.connect()
         console.error('Connection error', err.stack);
     });
 
+
+app.listen(port, () => {
+    console.log(`App running on port ${port}`);
+});
 
 app.get('/api/goals', async (req, res) => {
     try {
