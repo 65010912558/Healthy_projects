@@ -11,7 +11,7 @@ const dbConfig = {
     user: 'root',
     database: 'one_qr26',
     password: 'PntsJjvJWrEanI1wYFzMy2uI5UG44yQi',
-    port: portT,
+    port: port,
 };
 
 
