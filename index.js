@@ -6,10 +6,10 @@ const { Client } = require('pg');
 const app = express();
 
 const dbConfig = {
-    user: 'postgres',         
-    host: 'localhost',            
-    database: 'one',  
-    password: 'pooHLK123',      
+    host: 'dpg-cs62pr88fa8c73aslnk0-a',            
+    user: 'root',         
+    database: 'one_qr26',  
+    password: 'PntsJjvJWrEanI1wYFzMy2uI5UG44yQi',      
     port: 5432,               
 };
 
