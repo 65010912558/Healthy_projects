@@ -1,4 +1,4 @@
-
+const bcrypt = require('bcrypt');
 const express = require('express');
 const { Client } = require('pg');
 require('dotenv').config();
@@ -221,11 +221,11 @@ app.get('/api/users', async (req, res) => {
 
 // ฟังก์ชันเพิ่มผู้ใช้ใหม่
 app.post('/api/users', async (req, res) => {
-    const { name, email, password } = req.body; // ดึงข้อมูลจาก request body
+    const { name, password } = req.body; // ดึงข้อมูลจาก request body
     console.log("Received data:", req.body);
     try {
         const result = await client.query(
-            'INSERT INTO users (name, email, password) VALUES ($1,$2, $3) RETURNING *', [name, email, password]);
+            'INSERT INTO users (name, password) VALUES ($1,$2) RETURNING *', [name, password]);
         res.status(201).json(result.rows[0]); // ส่งข้อมูลผู้ใช้ที่ถูกสร้างขึ้นใหม่
     } catch (err) {
         console.error('Error executing query', err.stack);
@@ -236,9 +236,9 @@ app.post('/api/users', async (req, res) => {
 // ฟังก์ชันแก้ไขข้อมูลผู้ใช้
 app.put('/api/users/:id', async (req, res) => {
     const userId = req.params.id; // ดึง id จาก params
-    const { name, email, password } = req.body; // ดึงข้อมูลจาก request body
+    const { name,  password } = req.body; // ดึงข้อมูลจาก request body
     try {
-        const result = await client.query('UPDATE users SET name = $1, email = $2, password = $3 WHERE id = $4 RETURNING *', [name, email, password, userId]);
+        const result = await client.query('UPDATE users SET name = $1, password = $2 WHERE id = $3 RETURNING *', [name, password, userId]);
         if (result.rows.length === 0) {
             return res.status(404).send('User not found');
         }
@@ -266,23 +266,36 @@ app.delete('/api/users/:id', async (req, res) => {
 app.post('/api/users/register', async (req, res) => {
     const { name, password } = req.body;
   
-    // ตรวจสอบว่า username และ password ถูกส่งมา
+    // ตรวจสอบว่า name และ password ถูกส่งมา
     if (!name || !password) {
-      return res.status(400).json({ message: 'Please provide a username and password' });
+        return res.status(400).json({ message: 'Please provide a username and password' });
     }
   
-    // เข้ารหัส password ด้วย bcrypt
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // ตรวจสอบว่า name ซ้ำหรือไม่
+    const checkQuery = 'SELECT * FROM users WHERE name = ?';
+    db.query(checkQuery, [name], async (err, result) => {
+        if (err) {
+            return res.status(500).json({ message: 'Error checking username', error: err });
+        }
+
+        // ถ้าเจอผลลัพธ์ แสดงว่าชื่อนี้มีอยู่แล้ว
+        if (result.length > 0) {
+            return res.status(400).json({ message: 'Username already exists. Please choose a different one.' });
+        }
+
+        // ถ้าไม่ซ้ำ เข้ารหัส password ด้วย bcrypt
+        const hashedPassword = await bcrypt.hash(password, 10);
   
-    // บันทึกข้อมูลลงฐานข้อมูล
-    const query = 'INSERT INTO users (name, password) VALUES (?, ?)';
-    db.query(query, [name, hashedPassword], (err, result) => {
-      if (err) {
-        return res.status(500).json({ message: 'Error registering user', error: err });
-      }
-      res.status(201).json({ message: 'User registered successfully' });
+        // บันทึกข้อมูลลงฐานข้อมูล
+        const insertQuery = 'INSERT INTO users (name, password) VALUES (?, ?)';
+        db.query(insertQuery, [name, hashedPassword], (err, result) => {
+            if (err) {
+                return res.status(500).json({ message: 'Error registering user', error: err });
+            }
+            res.status(201).json({ message: 'User registered successfully' });
+        });
     });
-  });
+});
   
 // API Login
 app.post('/api/users/login', (req, res) => {
