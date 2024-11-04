@@ -267,7 +267,7 @@ app.post('/api/users/register', async (req, res) => {
     const { name, password } = req.body;
   
     // ตรวจสอบว่า username และ password ถูกส่งมา
-    if (!username || !password) {
+    if (!name || !password) {
       return res.status(400).json({ message: 'Please provide a username and password' });
     }
   
