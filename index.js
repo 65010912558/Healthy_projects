@@ -1,4 +1,4 @@
-const bcrypt = require('bcrypt');
+
 const express = require('express');
 const { Client } = require('pg');
 require('dotenv').config();
@@ -263,17 +263,17 @@ app.delete('/api/users/:id', async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 });
-app.post('/api/users/register', async (req, res) => {
+app.post('/api/users/register', (req, res) => {
     const { name, password } = req.body;
-  
+
     // ตรวจสอบว่า name และ password ถูกส่งมา
     if (!name || !password) {
         return res.status(400).json({ message: 'Please provide a username and password' });
     }
-  
+
     // ตรวจสอบว่า name ซ้ำหรือไม่
     const checkQuery = 'SELECT * FROM users WHERE name = ?';
-    db.query(checkQuery, [name], async (err, result) => {
+    db.query(checkQuery, [name], (err, result) => {
         if (err) {
             return res.status(500).json({ message: 'Error checking username', error: err });
         }
@@ -283,12 +283,9 @@ app.post('/api/users/register', async (req, res) => {
             return res.status(400).json({ message: 'Username already exists. Please choose a different one.' });
         }
 
-        // ถ้าไม่ซ้ำ เข้ารหัส password ด้วย bcrypt
-        const hashedPassword = await bcrypt.hash(password, 10);
-  
-        // บันทึกข้อมูลลงฐานข้อมูล
+        // บันทึกข้อมูลลงฐานข้อมูลโดยไม่เข้ารหัส password
         const insertQuery = 'INSERT INTO users (name, password) VALUES (?, ?)';
-        db.query(insertQuery, [name, hashedPassword], (err, result) => {
+        db.query(insertQuery, [name, password], (err, result) => {
             if (err) {
                 return res.status(500).json({ message: 'Error registering user', error: err });
             }
