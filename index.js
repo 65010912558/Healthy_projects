@@ -263,4 +263,55 @@ app.delete('/api/users/:id', async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 });
+app.post('/api/users/register', async (req, res) => {
+    const { name, password } = req.body;
+  
+    // ตรวจสอบว่า username และ password ถูกส่งมา
+    if (!username || !password) {
+      return res.status(400).json({ message: 'Please provide a username and password' });
+    }
+  
+    // เข้ารหัส password ด้วย bcrypt
+    const hashedPassword = await bcrypt.hash(password, 10);
+  
+    // บันทึกข้อมูลลงฐานข้อมูล
+    const query = 'INSERT INTO users (name, password) VALUES (?, ?)';
+    db.query(query, [name, hashedPassword], (err, result) => {
+      if (err) {
+        return res.status(500).json({ message: 'Error registering user', error: err });
+      }
+      res.status(201).json({ message: 'User registered successfully' });
+    });
+  });
+  
+// API Login
+app.post('/api/users/login', (req, res) => {
+    const { name, password } = req.body;
+  
+    // ตรวจสอบว่า username และ password ถูกส่งมา
+    if (!name || !password) {
+      return res.status(400).json({ message: 'Please provide a name and password' });
+    }
+  
+    // ตรวจสอบ username ในฐานข้อมูล
+    const query = 'SELECT * FROM users WHERE name = ?';
+    db.query(query, [name], async (err, results) => {
+      if (err) {
+        return res.status(500).json({ message: 'Error logging in', error: err });
+      }
+  
+      if (results.length === 0) {
+        return res.status(401).json({ message: 'Invalid name or password' });
+      }
+  
+      // ตรวจสอบ password ที่เข้ารหัส
+      const user = results[0];
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        return res.status(401).json({ message: 'Invalid name or password' });
+      }
+  
+      res.status(200).json({ message: 'Login successful' });
+    });
+  });
 
